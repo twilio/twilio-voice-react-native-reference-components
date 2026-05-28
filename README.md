@@ -12,11 +12,12 @@ Reference implementations showing how to build common Twilio Voice use cases wit
 
 ```
 twilio-voice-rn-reference-components/
-+-- server/    # Node.js + Express backend (token minting, TwiML, ConversationRelay WebSocket)
-+-- client/    # Expo React Native app
++-- ai-conversation/
+|   +-- client/
+|   +-- server/
 ```
 
-The server and client are independent packages. You run them side by side during development.
+During development, the Expo app and bundler are run side by side with the server.
 
 ## Prerequisites
 
@@ -43,7 +44,7 @@ In the Twilio Console:
 2. Create an **API Key** (Account -> API keys & tokens) and note the **SID** and **Secret**.
 3. Create a **TwiML App** (Voice -> TwiML -> TwiML Apps). Leave the Voice Request URL blank for now; you will set it per-component below.
 
-### 3. Configure server secrets
+### 3. Configure secrets
 
 ```bash
 cd server
@@ -59,9 +60,12 @@ AUTH_TOKEN=...
 API_KEY_SID=...
 API_KEY_SECRET=...
 APP_SID=...
-CALLBACK_BASE_URL=
 DEFAULT_IDENTITY=bob
 OPENAI_API_KEY=...
+IOS_BUNDLE_IDENTIFIER=...
+ANDROID_PACKAGE_NAME=...
+
+CALLBACK_BASE_URL=
 ```
 
 ### 4. Start an HTTPS tunnel
@@ -85,26 +89,10 @@ CALLBACK_BASE_URL=<YOUR-EXAMPLE-TUNNEL-HOST>.ngrok.app
 ### 6. Start the server
 
 ```bash
-npm start
+npm run start-server
 ```
 
-### 7. Set up the client
-
-```bash
-cd ../client
-npm install
-cp example.env .env
-```
-
-Fill in `.env`. Replace the example placeholder with your actual tunnel host:
-
-```
-CALLBACK_BASE_URL=<YOUR-EXAMPLE-TUNNEL-HOST>.ngrok.app
-IOS_BUNDLE_IDENTIFIER=...
-ANDROID_PACKAGE_NAME=...
-```
-
-### 8. Run the client
+### 7. Run the client
 
 ```bash
 npx expo run:ios
