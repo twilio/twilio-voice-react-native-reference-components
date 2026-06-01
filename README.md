@@ -12,16 +12,17 @@ Reference implementations showing how to build common Twilio Voice use cases wit
 
 ```
 twilio-voice-rn-reference-components/
-+-- ai-conversation/
-|   +-- client/
-|   +-- server/
++-- reference-components/
+|   +-- ai-conversation/
+|   |   +-- client/ (Expo code, such as React hooks and components)
+|   |   +-- server/ (Express code, such as websocket and https handlers)
 ```
 
 During development, the Expo app and bundler are run side by side with the server.
 
 ## Prerequisites
 
-- Node.js 22+
+- Node.js 24+
 - A Twilio account
 - An OpenAI API key (required by the AI Conversation component)
 - An HTTPS tunnel to your local server (for example, ngrok)
@@ -33,7 +34,7 @@ During development, the Expo app and bundler are run side by side with the serve
 
 ```bash
 git clone <repo-url>
-cd twilio-voice-rn-reference-components
+cd twilio-voice-react-native-reference-components
 ```
 
 ### 2. Set up Twilio
@@ -49,24 +50,11 @@ In the Twilio Console:
 ```bash
 cd server
 npm install
-cp example.env .env
+cp server.example.env server.env
+cp client.example.env client.env
 ```
 
 Fill in your Twilio and OpenAI credentials in `.env`. Leave `CALLBACK_BASE_URL` blank for now; you will set it after starting the tunnel.
-
-```
-ACCOUNT_SID=...
-AUTH_TOKEN=...
-API_KEY_SID=...
-API_KEY_SECRET=...
-APP_SID=...
-DEFAULT_IDENTITY=bob
-OPENAI_API_KEY=...
-IOS_BUNDLE_IDENTIFIER=...
-ANDROID_PACKAGE_NAME=...
-
-CALLBACK_BASE_URL=
-```
 
 ### 4. Start an HTTPS tunnel
 
@@ -80,7 +68,7 @@ Note the HTTPS forwarding URL ngrok prints. **Use your own URL in the steps belo
 
 ### 5. Set the callback URL
 
-In `.env`, set `CALLBACK_BASE_URL` to your tunnel host **without the protocol**. Replace the example placeholder with your actual tunnel host:
+In `server.env` and `client.env`, set `CALLBACK_BASE_URL` to your tunnel host **without the protocol**. Replace the example placeholder with your actual tunnel host:
 
 ```
 CALLBACK_BASE_URL=<YOUR-EXAMPLE-TUNNEL-HOST>.ngrok.app
@@ -95,10 +83,12 @@ npm run start-server
 ### 7. Run the client
 
 ```bash
-npx expo run:ios
-# or
-npx expo run:android
+npm run expo -- prebuild
 ```
+
+- Open the `android/` folder in Android Studio to build and run the Android app.
+
+- Open the `ios/<YOUR-BUNDLE-IDENTIFIER>.xcworkspace` in Xcode to build and run the iOS app.
 
 ## Running a component
 
