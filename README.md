@@ -12,10 +12,25 @@ Reference implementations showing how to build common Twilio Voice use cases wit
 
 ```
 twilio-voice-rn-reference-components/
+|
++-- secrets.example.env          # configuration file for server-side and mobile-app secrets
+|
++-- url.example.env              # configuration file for the reference component dev server url
+|
++-- app.config.mjs               # expo configuration file
+|
++-- server.ts                    # reference component dev server
+|
 +-- reference-components/
-|   +-- ai-conversation/
-|   |   +-- client/ (Expo code, such as React hooks and components)
-|   |   +-- server/ (Express code, such as websocket and https handlers)
+|
+|   +-- app/                     # not a reference component, required for Expo Router structure
+|   |   +-- _layout.tsx          # required for Expo Router structure
+|   |   +-- index.tsx            # required for Expo Router structure
+|   |   +-- ai-conversation.tsx  # links the AI Conversation Component to Expo Router
+|
+|   +-- ai-conversation/         # AI Conversation Reference Component
+|   |   +-- client/              # Expo code, such as React hooks and components
+|   |   +-- server/              # Express and websocket code
 ```
 
 During development, the Expo app and bundler are run side by side with the server.
@@ -48,13 +63,12 @@ In the Twilio Console:
 ### 3. Configure secrets
 
 ```bash
-cd server
 npm install
-cp server.example.env server.env
-cp client.example.env client.env
+cp secrets.example.env secrets.env
+cp url.example.env url.env
 ```
 
-Fill in your Twilio and OpenAI credentials in `.env`. Leave `CALLBACK_BASE_URL` blank for now; you will set it after starting the tunnel.
+Fill in the environment variables in `secrets.env`.
 
 ### 4. Start an HTTPS tunnel
 
@@ -68,22 +82,22 @@ Note the HTTPS forwarding URL ngrok prints. **Use your own URL in the steps belo
 
 ### 5. Set the callback URL
 
-In `server.env` and `client.env`, set `CALLBACK_BASE_URL` to your tunnel host **without the protocol**. Replace the example placeholder with your actual tunnel host:
+In `url.env`, set `EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST` to your tunnel host **without the protocol**. Replace the example placeholder with your actual tunnel host:
 
 ```
-CALLBACK_BASE_URL=<YOUR-EXAMPLE-TUNNEL-HOST>.ngrok.app
+EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST=<SOME-EXAMPLE-DOMAIN>.ngrok.app
 ```
 
 ### 6. Start the server
 
 ```bash
-npm run start-server
+npm run server
 ```
 
 ### 7. Run the client
 
 ```bash
-npm run expo -- prebuild
+npm run expo:prebuild
 ```
 
 - Open the `android/` folder in Android Studio to build and run the Android app.
