@@ -37,9 +37,14 @@ const loadServerEnvironment = (): ServerEnvironment => {
     REQUIRED_SERVER_ENV.map((name) => [name, process.env[name]])
   ) as { [K in RequiredEnvKey]: string };
 
+  const PORT = Number(process.env.PORT ?? 3030);
+  if (typeof PORT !== 'number' || !Number.isFinite(PORT)) {
+    throw new Error('Invalid PORT value.');
+  }
+
   return {
     ...secrets,
-    PORT: Number(process.env.PORT ?? 3030),
+    PORT,
   };
 };
 

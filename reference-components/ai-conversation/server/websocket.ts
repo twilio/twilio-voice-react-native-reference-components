@@ -109,14 +109,22 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
             for await (const chunk of stream) {
               const token = chunk.choices[0]?.delta?.content;
               if (token) {
-                ws.send(JSON.stringify({ type: 'text', token, last: false }));
+                if (ws.readyState === WebSocket.OPEN) {
+                  ws.send(JSON.stringify({ type: 'text', token, last: false }));
+                } else {
+                  console.warn(`websocket state no longer open: ${ws.readyState}`);
+                }
                 collected += token;
               }
             }
           } catch (err) {
             console.error('OpenAI stream error', err);
           } finally {
-            ws.send(JSON.stringify({ type: 'text', token: '', last: true }));
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ type: 'text', token: '', last: true }));
+            } else {
+              console.warn(`websocket state no longer open: ${ws.readyState}`);
+            }
           }
 
           if (collected) {

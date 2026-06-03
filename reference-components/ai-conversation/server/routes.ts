@@ -40,10 +40,12 @@ export const createExpressRouter = (env: ServerEnvironment): Router => {
 
     token.addGrant(voiceGrant);
 
-    res.json({
-      identity,
-      token: token.toJwt(),
-    });
+    res
+      .set('Cache-Control', 'no-store')
+      .json({
+        identity,
+        token: token.toJwt(),
+      });
   });
 
   expressRouter.post(
