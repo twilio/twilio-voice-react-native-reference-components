@@ -3,6 +3,9 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "expo:prebuild": "node --env-file=secrets.env ./node_modules/expo/bin/cli prebuild",
     "expo:start": "node --env-file=url.env ./node_modules/expo/bin/cli start",
