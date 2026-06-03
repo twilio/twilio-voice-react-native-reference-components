@@ -11,7 +11,7 @@ Reference implementations showing how to build common Twilio Voice use cases wit
 ## Project layout
 
 ```
-twilio-voice-rn-reference-components/
+twilio-voice-react-native-reference-components/
 |
 +-- secrets.example.env          # configuration file for server-side and mobile-app secrets
 |
@@ -94,11 +94,13 @@ EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST=<SOME-EXAMPLE-DOMAIN>.ngrok.app
 npm run server
 ```
 
-### 7. Run the client
+### 7. Prebuild the client
 
 ```bash
 npm run expo:prebuild
 ```
+
+### 8. Run the client on a mobile device
 
 - Open the `android/` folder in Android Studio to build and run the Android app.
 
