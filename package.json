@@ -28,7 +28,7 @@
     "expo-symbols": "55.0.9",
     "expo-system-ui": "55.0.18",
     "expo-web-browser": "55.0.16",
-    "express": "4.21.0",
+    "express": "5.2.1",
     "openai": "5.10.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
