@@ -70,7 +70,11 @@ cp url.example.env url.env
 
 Fill in the environment variables in `secrets.env`.
 
-### 4. Start an HTTPS tunnel
+### 4. Provide a Google Services JSON file
+
+A valid Google Services JSON file, which can be generated from a Firebase project, is required for the Twilio Voice RN SDK. Providing a valid `google-services.json` file in the root of the project folder (adjacent to `package.json`) is required for the prebuild step for Android platforms.
+
+### 5. Start an HTTPS tunnel
 
 In a separate terminal:
 
@@ -80,7 +84,7 @@ ngrok http 3030
 
 Note the HTTPS forwarding URL ngrok prints. **Use your own URL in the steps below; do not use the example placeholders verbatim.**
 
-### 5. Set the callback URL
+### 6. Set the callback URL
 
 In `url.env`, set `EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST` to your tunnel host **without the protocol**. Replace the example placeholder with your actual tunnel host:
 
@@ -88,19 +92,19 @@ In `url.env`, set `EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST` to your tun
 EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST=<SOME-EXAMPLE-DOMAIN>.ngrok.app
 ```
 
-### 6. Start the server
+### 7. Start the server
 
 ```bash
 npm run server
 ```
 
-### 7. Prebuild the client
+### 8. Prebuild the client
 
 ```bash
 npm run expo:prebuild
 ```
 
-### 8. Run the client on a mobile device
+### 9. Run the client on a mobile device
 
 - Open the `android/` folder in Android Studio to build and run the Android app.
 
