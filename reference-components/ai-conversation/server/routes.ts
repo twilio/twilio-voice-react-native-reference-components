@@ -20,9 +20,15 @@ export const createExpressRouter = (env: ServerEnvironment): Router => {
       ? req.query.identity
       : undefined;
 
-    if (typeof identity !== 'string' || identity.length === 0) {
+    if (
+      typeof identity !== 'string' ||
+      identity.length === 0 ||
+      identity.length > 120 ||
+      !/^[a-zA-Z0-9_-]+$/.test(identity)
+    ) {
       return res.status(400).json({
-        error: 'identity query param must be non-empty string',
+        error:
+          'identity query param must be a non-empty string of alphanumeric, underscore, or hyphen characters and at most 120 characters',
       });
     }
 

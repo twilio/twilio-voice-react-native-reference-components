@@ -38,9 +38,7 @@ const SYSTEM_PROMPT: string = [
   'Do not include bullet points, asterisks, or special symbols.',
 ].join(' ');
 
-const sessions = new Map<string, ChatMessage[]>();
-
-const isCRelayConnection = (env: ServerEnvironment, req: IncomingMessage): boolean => {
+export const isCRelayConnection = (env: ServerEnvironment, req: IncomingMessage): boolean => {
   const signature = req.headers['x-twilio-signature'];
   if (typeof signature !== 'string') {
     return false;
@@ -49,22 +47,18 @@ const isCRelayConnection = (env: ServerEnvironment, req: IncomingMessage): boole
   return Twilio.validateRequest(
     env.TWILIO_AUTH_TOKEN,
     signature,
+    // Twilio ConversationRelay signs the `wss` upgrade url. Do not change this to `https`
     `wss://${env.EXPO_PUBLIC_REFERENCE_COMPONENTS_DEV_SERVER_HOST}/${COMPONENT_BASE_PATH}`,
     {}
   );
 };
 
 export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer => {
+  const sessions = new Map<string, ChatMessage[]>();
   const wss = new WebSocketServer({ noServer: true });
   const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
-  wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
-    if (!isCRelayConnection(env, req)) {
-      console.warn('Rejecting WebSocket upgrade: invalid Twilio signature');
-      ws.close(1008, 'Invalid Twilio signature');
-      return;
-    }
-
+  wss.on('connection', (ws: WebSocket) => {
     console.log('ConversationRelay WebSocket connected');
     let callSid: string | undefined;
 

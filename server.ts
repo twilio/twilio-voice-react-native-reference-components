@@ -74,6 +74,12 @@ const createHttpServer = (env: ServerEnvironment) => {
 
     switch (pathname) {
       case `/${aiConversationComponent.COMPONENT_BASE_PATH}`:
+        if (!aiConversationComponent.isCRelayConnection(env, req)) {
+          console.warn('Rejecting WebSocket upgrade: invalid Twilio signature');
+          socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+          socket.destroy();
+          return;
+        }
         aiConversationWss.handleUpgrade(req, socket, head, (ws) => {
           aiConversationWss.emit('connection', ws, req);
         });
