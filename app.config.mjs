@@ -13,6 +13,13 @@ export default {
       icon: './assets/expo.icon',
       appleTeamId: process.env.IOS_APPLE_TEAM_ID,
       bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER,
+      infoPlist: {
+        NSMicrophoneUsageDescription: 'Voice calling capabilities.',
+        UIBackgroundModes: ['audio', 'voip'],
+      },
+      entitlements: {
+        'aps-environment': 'development',
+      },
     },
     android: {
       adaptiveIcon: {
