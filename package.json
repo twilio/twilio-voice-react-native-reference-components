@@ -1,5 +1,6 @@
 {
   "name": "twilio-voice-react-native-reference-components",
+  "license": "Apache-2.0",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "type": "module",
