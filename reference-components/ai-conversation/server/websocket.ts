@@ -268,6 +268,22 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
         return;
       }
 
+      // Make sure that the websocket is open. If not, defer the handling
+      // of the prompt message until it is.
+      if (realtime.socket.readyState !== WebSocket.OPEN) {
+        console.log(
+          'Socket was not ready when a prompt message came in. ' +
+            'Defer handling until the session is created properly.',
+        );
+        realtime.once('session.created', () => {
+          console.log(
+            'Session properly created. Handling deferred prompt message.',
+          );
+          handlePromptMessage(promptMessage);
+        });
+        return;
+      }
+
       // Append the caller's utterance to the conversation. This is always safe:
       // extra user items can accumulate in history while a response is in
       // flight, and a single later `response.create` answers all of them
@@ -313,9 +329,24 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
     };
 
     const handleRawMessage = (data: WebSocket.RawData) => {
+      // The raw websocket data can be a:
+      // - string
+      // - Buffer
+      // - Array of Buffers
+      // - An ArrayBuffer
+      // This nested ternary handles all four cases and gets the data as a
+      // string in textData.
+      const textData = typeof data === 'string'
+        ? data
+        : Buffer.isBuffer(data)
+          ? data.toString('utf8')
+          : Array.isArray(data)
+            ? Buffer.concat(data).toString('utf8')
+            : Buffer.from(data).toString('utf8');
+
       let message: IncomingRelayMessage;
       try {
-        message = JSON.parse(data.toString());
+        message = JSON.parse(textData);
       } catch {
         console.warn('Failed to parse CRelay message');
         return;
