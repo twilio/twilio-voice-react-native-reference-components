@@ -13,10 +13,14 @@ import { COMPONENT_BASE_PATH } from './index.ts';
 // Consider using a different realtime model suitable for your use-case.
 const REALTIME_MODEL = 'gpt-realtime-2' as const;
 
-// `ws` has no built-in dead-peer detection. We ping ConversationRelay on this
-// interval and tear the call down after this many consecutive missed pongs, so
-// a Twilio connection that vanishes without a TCP FIN cannot leak the paid
-// OpenAI realtime socket indefinitely.
+// `ws` has no built-in dead-peer detection. We ping BOTH peers - the Twilio
+// ConversationRelay socket and the OpenAI realtime socket - on this interval
+// and tear the call down after this many consecutive missed pongs. The two
+// heartbeats are independent and complementary: a half-open connection on
+// either side (peer vanishes with no TCP FIN, so 'close' never fires) is
+// invisible to the other side's heartbeat - the healthy peer keeps pong-ing -
+// so each side needs its own. This prevents leaking the paid OpenAI socket
+// when Twilio dies, and prevents dead air on a paid call when OpenAI dies.
 const HEARTBEAT_INTERVAL_MS = 15_000;
 const MAX_MISSED_PONGS = 2;
 
@@ -99,10 +103,15 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
     type TurnState = 'idle' | 'responding' | 'pending';
     let turnState: TurnState = 'idle';
 
-    // Heartbeat state. `heartbeat` is declared before `teardown` so the closure
-    // can clear it; it is assigned once the connection is wired up below.
-    let heartbeat: ReturnType<typeof setInterval> | undefined;
-    let missedPongs = 0;
+    // Heartbeat state, one pair per peer. The interval handles are declared
+    // before `teardown` so the closure can clear them; they are assigned once
+    // each connection is wired up below. The Twilio heartbeat starts with this
+    // connection; the OpenAI one starts in `handleSetupMessage`, once its
+    // socket exists.
+    let twilioConversationRelayHeartbeat: ReturnType<typeof setInterval> | undefined;
+    let twilioMissedPongs = 0;
+    let openAiRealtimeHeartbeat: ReturnType<typeof setInterval> | undefined;
+    let openAiMissedPongs = 0;
 
     // Tearing down always closes BOTH the Twilio and OpenAI connections, so a
     // failure on either side brings down the other rather than leaving a
@@ -119,7 +128,8 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
       tornDown = true;
       console.log(`Tearing down call${callSid ? ` ${callSid}` : ''}: ${reason}`);
 
-      clearInterval(heartbeat);
+      clearInterval(twilioConversationRelayHeartbeat);
+      clearInterval(openAiRealtimeHeartbeat);
 
       if (realtime) {
         // Swallow any late error from closing an already-dead socket.
@@ -214,6 +224,38 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
       // that re-emits through the emitter-level `error` above, so they already
       // route through teardown (and never reach Node as an uncaught error).
       realtime.socket.on('close', () => teardown('openai socket closed'));
+
+      // Heartbeat for the OpenAI side, mirroring the Twilio one below. The
+      // realtime socket can go half-open (idle/NAT timeout, network partition)
+      // with no close frame; the Twilio heartbeat cannot detect this because
+      // Twilio stays healthy and keeps pong-ing while the caller hears dead
+      // air. Pinging OpenAI directly and tearing down on missed pongs closes
+      // that gap. We start it here, not at connection time, because the socket
+      // only exists after setup.
+      realtime.socket.on('pong', () => {
+        openAiMissedPongs = 0;
+        console.log('ponged by openai');
+      });
+      openAiRealtimeHeartbeat = setInterval(() => {
+        if (openAiMissedPongs >= MAX_MISSED_PONGS) {
+          teardown('openai heartbeat timeout');
+          return;
+        }
+        // Skip a tick while the socket is still CONNECTING (or already gone):
+        // pinging a non-open socket throws, and an early miss would count
+        // against a connection that is merely still handshaking.
+        if (realtime?.socket.readyState !== WebSocket.OPEN) {
+          return;
+        }
+        openAiMissedPongs += 1;
+        try {
+          console.log('pinging openai');
+          realtime.socket.ping();
+        } catch (err) {
+          console.warn('Failed to ping OpenAI realtime socket', err);
+          teardown('openai ping failed');
+        }
+      }, HEARTBEAT_INTERVAL_MS);
     };
 
     const handlePromptMessage = (promptMessage: PromptMessage) => {
@@ -305,24 +347,26 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
       teardown('twilio socket error');
     });
 
-    // Heartbeat: ConversationRelay answers our protocol-level pings with pongs.
-    // If MAX_MISSED_PONGS elapse with no pong, the peer is gone (half-open
-    // connection - no FIN, so 'close' never fires) and we tear down to release
-    // the OpenAI socket rather than leak it.
+    // Heartbeat for the Twilio side: ConversationRelay answers our
+    // protocol-level pings with pongs. If MAX_MISSED_PONGS elapse with no pong,
+    // the peer is gone (half-open connection - no FIN, so 'close' never fires)
+    // and we tear down to release the OpenAI socket rather than leak it.
     ws.on('pong', () => {
-      missedPongs = 0;
+      twilioMissedPongs = 0;
+      console.log('ponged by crelay');
     });
-    heartbeat = setInterval(() => {
-      if (missedPongs >= MAX_MISSED_PONGS) {
-        teardown('heartbeat timeout');
+    twilioConversationRelayHeartbeat = setInterval(() => {
+      if (twilioMissedPongs >= MAX_MISSED_PONGS) {
+        teardown('twilio heartbeat timeout');
         return;
       }
-      missedPongs += 1;
+      twilioMissedPongs += 1;
       try {
+        console.log('pinging crelay');
         ws.ping();
       } catch (err) {
         console.warn('Failed to ping ConversationRelay socket', err);
-        teardown('ping failed');
+        teardown('twilio ping failed');
       }
     }, HEARTBEAT_INTERVAL_MS);
   });
