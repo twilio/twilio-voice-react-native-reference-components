@@ -15,6 +15,10 @@ const WELCOME_GREETING = [
 export const createExpressRouter = (env: ServerEnvironment): Router => {
   const expressRouter: Router = Router();
 
+  // IMPORTANT NOTE:
+  // This route is intentionally left unauthenticated/unauthorized. Please do
+  // not use this route in production without first adding a robust and secure
+  // mechanism for validating incoming requests.
   expressRouter.get('/token', (req: Request, res: Response) => {
     const identity = typeof req.query.identity === 'string'
       ? req.query.identity

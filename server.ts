@@ -38,7 +38,7 @@ const loadServerEnvironment = (): ServerEnvironment => {
   ) as { [K in RequiredEnvKey]: string };
 
   const PORT = Number(process.env.PORT ?? 3030);
-  if (!Number.isInteger(PORT) || PORT < 0 || PORT >= 65535) {
+  if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
     throw new Error('Invalid PORT value.');
   }
 
@@ -70,7 +70,18 @@ const createHttpServer = (env: ServerEnvironment) => {
   const aiConversationWss = aiConversationComponent.createWebsocketServer(env);
 
   httpServer.on('upgrade', (req, socket, head) => {
-    const { pathname } = new URL(req.url ?? '', `http://${req.headers.host}`);
+    let pathname: string;
+    try {
+      ({ pathname } = new URL(req.url ?? '', `http://${req.headers.host}`));
+    } catch {
+      // A malformed request target or Host header makes `new URL` throw. Reject
+      // just this handshake - because both inputs are client-controlled and this
+      // runs before any per-connection error handling, an uncaught throw here
+      // would crash the process and drop every in-flight call, turning one bad
+      // upgrade into a server-wide outage.
+      socket.destroy();
+      return;
+    }
 
     switch (pathname) {
       case `/${aiConversationComponent.COMPONENT_BASE_PATH}`:

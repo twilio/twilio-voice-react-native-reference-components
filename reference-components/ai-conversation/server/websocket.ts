@@ -158,6 +158,12 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
     };
 
     const handleSetupMessage = (setupMessage: SetupMessage) => {
+      if (realtime) {
+        console.warn('Received a setup message for a callSid that already has been set up.');
+        teardown('duplicate setup message received');
+        return;
+      }
+
       ({ callSid } = setupMessage);
       console.log(`CRelay setup for call ${callSid}`);
 
