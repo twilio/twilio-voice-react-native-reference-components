@@ -234,7 +234,6 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
       // only exists after setup.
       realtime.socket.on('pong', () => {
         openAiMissedPongs = 0;
-        console.log('ponged by openai');
       });
       openAiRealtimeHeartbeat = setInterval(() => {
         if (openAiMissedPongs >= MAX_MISSED_PONGS) {
@@ -249,7 +248,6 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
         }
         openAiMissedPongs += 1;
         try {
-          console.log('pinging openai');
           realtime.socket.ping();
         } catch (err) {
           console.warn('Failed to ping OpenAI realtime socket', err);
@@ -353,7 +351,6 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
     // and we tear down to release the OpenAI socket rather than leak it.
     ws.on('pong', () => {
       twilioMissedPongs = 0;
-      console.log('ponged by crelay');
     });
     twilioConversationRelayHeartbeat = setInterval(() => {
       if (twilioMissedPongs >= MAX_MISSED_PONGS) {
@@ -362,7 +359,6 @@ export const createWebsocketServer = (env: ServerEnvironment): WebSocketServer =
       }
       twilioMissedPongs += 1;
       try {
-        console.log('pinging crelay');
         ws.ping();
       } catch (err) {
         console.warn('Failed to ping ConversationRelay socket', err);

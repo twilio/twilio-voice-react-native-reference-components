@@ -38,7 +38,7 @@ const loadServerEnvironment = (): ServerEnvironment => {
   ) as { [K in RequiredEnvKey]: string };
 
   const PORT = Number(process.env.PORT ?? 3030);
-  if (typeof PORT !== 'number' || !Number.isFinite(PORT)) {
+  if (!Number.isInteger(PORT) || PORT < 0 || PORT >= 65535) {
     throw new Error('Invalid PORT value.');
   }
 
