@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2026 Twilio, Inc.
+ *
+ * See LICENSE in the project root for license information.
+ */
+
 import { Router, type Request, type Response } from 'express';
 import Twilio from 'twilio';
 import { type ServerEnvironment } from '../../../server.ts';

@@ -1,5 +1,11 @@
 // @ts-check
 
+/**
+ * Copyright (C) 2026 Twilio, Inc.
+ *
+ * See LICENSE in the project root for license information.
+ */
+
 export default {
   expo: {
     name: 'twilio-voice-react-native-reference-components',

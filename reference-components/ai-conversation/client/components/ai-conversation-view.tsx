@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2026 Twilio, Inc.
+ *
+ * See LICENSE in the project root for license information.
+ */
+
 import { Call, Voice } from '@twilio/voice-react-native-sdk';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';

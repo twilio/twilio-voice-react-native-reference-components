@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2026 Twilio, Inc.
+ *
+ * See LICENSE in the project root for license information.
+ */
+
 import http from 'node:http';
 import express from 'express';
 
@@ -22,7 +28,7 @@ export type ServerEnvironment = Readonly<
 
 /**
  * Loads, validates, and returns the server environment. This is the single
- * entry point for env access — pass the returned object to consumers
+ * entry point for env access - pass the returned object to consumers
  * (e.g. `createHttpServer`) instead of reading `process.env` elsewhere.
  *
  * @throws if any required variable is missing.

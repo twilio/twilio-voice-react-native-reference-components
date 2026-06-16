@@ -1,3 +1,9 @@
+/**
+ * Copyright (C) 2026 Twilio, Inc.
+ *
+ * See LICENSE in the project root for license information.
+ */
+
 import { Link } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
