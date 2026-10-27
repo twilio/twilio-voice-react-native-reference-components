@@ -2,6 +2,22 @@
 
 Reference implementations showing how to build common Twilio Voice use cases with the Twilio Voice React Native SDK in an Expo app, paired with a Node.js backend.
 
+## Community Contributions and Support
+
+This repository is publicly available and maintained by Twilio under a limited external contribution model.
+
+Due to limited maintenance capacity, external pull requests are not currently accepted.
+
+GitHub Issues may be used to report reproducible bugs or provide feature feedback about these reference components. Issues are reviewed on a best-effort basis, with no SLA or guaranteed response.
+
+GitHub Issues are not an official Twilio support channel. For production issues, general usage questions, or account-specific assistance, please contact [Twilio Support](https://help.twilio.com/). If you have a Twilio account manager, you may also escalate through them.
+
+Do not share [Personally Identifiable Information (PII)](https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii) or sensitive account information, including access tokens, API keys, and credentials, in issues, logs, or screenshots.
+
+For security vulnerabilities, follow the [security policy](SECURITY.md) and report privately through [Twilio's Vulnerability Disclosure Program](https://www.twilio.com/en-us/security/vulnerability-disclosure-program), rather than public GitHub Issues.
+
+See [CONTRIBUTING.md](https://github.com/twilio/twilio-voice-react-native-reference-components/blob/main/CONTRIBUTING.md) for reporting guidance.
+
 ## Available components
 
 | Component | Description |
